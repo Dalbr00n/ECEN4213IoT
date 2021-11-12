@@ -66,12 +66,7 @@ setInterval(function(){
 }, 500);
 
 
-
+//open up the server on port: port (defined above)
 server.listen(port, () => {
   console.log(`Example app listening on port ${port}!`)
 });
-
-
-// pause / resume frame emission (without tunning off the camera)
-// shutdown everything, including, camera, browser, server:
-console.log('Capturing camera');
