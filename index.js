@@ -4,6 +4,7 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
+//joystick dependences
 var http = require('http');
     fs = require('fs');
     url = require('url');
@@ -19,6 +20,7 @@ http.createServer(function (request,res) {
   if (request.method == 'POST') {
       var body = '';
 
+      //constructing the POST request 
       request.on('data', function (data) {
           body += data;
 
@@ -27,7 +29,7 @@ http.createServer(function (request,res) {
           if (body.length > 1e6)
               request.connection.destroy();
       });
-
+      
       request.on('end', function () {
           var post = qs.parse(body);
           console.log(post);
@@ -40,6 +42,7 @@ http.createServer(function (request,res) {
 app.use(express.static("public"));
 app.use("/img", express.static("img"));
 
+//opens up the index file for the server
 app.get('/', (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
@@ -57,7 +60,7 @@ var opts={
 
 var Webcam = NodeWebcam.create( opts );
 
-
+//emits the camera image (data) to the webpage as 'web'
 setInterval(function(){
     io.emit('web',data);
 }, 500);
