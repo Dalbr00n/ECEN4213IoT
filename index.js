@@ -1,10 +1,9 @@
 const express = require('express');
-var NodeWebcam = require('node-webcam');
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
-//joystick dependences
+//joystick dependences to send and recieve
 var http = require('http');
     fs = require('fs');
     url = require('url');
@@ -37,7 +36,7 @@ http.createServer(function (request,res) {
       });
   }
 }).listen(3001);
-
+// listening on port 3001 for the POST request
 
 app.use(express.static("public"));
 app.use("/img", express.static("img"));
@@ -46,19 +45,6 @@ app.use("/img", express.static("img"));
 app.get('/', (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
-
-
-
-var opts={
-  quality:30,
-  frames: 1,
-  saveShots: false,
-  output:"jpeg",
-  callbackReturn:"base64",
-  verbose:false
-}
-
-var Webcam = NodeWebcam.create( opts );
 
 //emits the camera image (data) to the webpage as 'web'
 setInterval(function(){
