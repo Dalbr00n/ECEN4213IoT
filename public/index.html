@@ -1,0 +1,122 @@
+<html>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <head>
+        <title>Robotic Control</title>
+        <style>
+            .head{
+                display:table-row;
+                height: 20%;
+                
+            }
+            .logo{
+                display:table-cell;
+                width:30%;
+                background-color: black;
+            }
+            .title{
+                display:table-cell;
+                background-color: black;
+                color:white;
+                text-align:center;
+                vertical-align: middle;
+                font-size:6vw;
+                font-family:Arial, Helvetica, sans-serif;
+            }
+            .body{
+                display: table-row;
+                margin-left: auto;
+                margin-right: auto;
+                width:100vw;
+            }
+            .cam{
+                display: table-cell;
+                width:100%;
+            }
+            .stickOut{
+                display:table-row;
+                margin-left:auto;
+                margin-right:auto;
+            }
+            .stick{
+                display:table-cell;
+                margin-left:0;
+                margin-right:0;
+            }
+            .sOut{
+                display:table-row;
+                width:100vw;
+            }
+            .sIn{
+                display:table-cell;
+                margin-left:auto;
+                margin-right:auto;
+            }
+        </style>
+    </head>
+    <body style="margin:0; padding:0">
+        <!--Head of the page-->
+        <header>
+            <div class="head">
+                <div class="logo"><img src="img/osu.png" style="width:90%;padding:10%"></div>
+                <div class="title"><strong>ROBOTIC CONTROL</strong></div>
+            </div>
+        </header>
+
+        <div class="body">
+            <div class = "cam"><img id="web" style="width:100%;margin-left: auto;margin-right: auto;">
+                <!--code to control the updating of the image-->
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.0.0/socket.io.js"></script>
+                <script>
+                    const socket = io.connect();
+
+                    socket.on('web',(data) =>{
+                        const imageS = document.getElementById('web');
+
+                        imageS.src = data;
+                    });
+                </script>
+            </div>
+        </div>
+        <!--Joystick section-->
+        <script src="joy.js"></script>
+        <div class = "stickOut">
+            <div class = "stick">
+                <div class = "sOut">
+                    <div class="sIn">
+                        <div id = "joy1" style="height:47vw;width:47vw;"></div>
+                    </div>
+                    <!--
+                    <div class="sIn">
+                        <div id = "joy2" style="height:47vw;width:47vw;"></div>
+                    </div>
+                    -->
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            var joy1 = new JoyStick('joy1');
+            //var joy2 = new JoyStick('joy2');
+
+            setInterval(function(){
+                var xpos = joy1.GetX();
+                var ypos = joy1.GetY();
+
+                const xhttp = new XMLHttpRequest();
+                let fd = new FormData();
+
+                formData = {
+                    "x": xpos.toString(),
+                    "y": ypos.toString()
+                }
+
+                console.log(JSON.stringify(fd));
+
+                xhttp.open('POST', "http://10.227.242.104:3001/joydata",false);
+                xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhttp.send(JSON.stringify(formData));
+            },500);
+        </script>
+    </body>
+</html>

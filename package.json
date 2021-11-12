@@ -1,0 +1,18 @@
+{
+  "name": "iotproject",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "camera-capture": "0.0.11",
+    "express": "^4.17.1",
+    "node-webcam": "^0.8.0",
+    "puppeteer": "^10.4.0",
+    "socketio": "^1.0.0"
+  }
+}
