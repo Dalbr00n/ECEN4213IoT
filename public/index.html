@@ -2,9 +2,14 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <head>
+    <head scroll="no">
         <title>Robotic Control</title>
         <style>
+            html, body {
+                overflow-x: hidden;
+                overscroll-behavior: contain;
+            }
+
             .head{
                 display:table-row;
                 height: 20%;
@@ -36,26 +41,55 @@
             }
             .stickOut{
                 display:table-row;
-                margin-left:auto;
-                margin-right:auto;
             }
             .stick{
                 display:table-cell;
-                margin-left:0;
-                margin-right:0;
             }
             .sOut{
-                display:table-row;
+                display:block;
+                text-align: center;
                 width:100vw;
             }
             .sIn{
                 display:table-cell;
-                margin-left:auto;
-                margin-right:auto;
+                text-align: center;
+            }
+            .formholder{
+                display:table-row;
+                text-align: center;
+            }
+            .sensorTableHead{
+                width: 100vw;
+                height: 5vw;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .sensorTable{
+                width: 100vw;
+                height: 50vw;
+                overflow: auto;
+                margin-left: auto;
+                margin-right: auto;
+                border: 1px solid black
+            }
+            table{
+                border: 1px solid black;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            tr:nth-child(even){
+                background-color: #dddddd;
+            }
+            td{
+                width: 10vw;
+                height: 5vw;
+                border: 1px solid #dddddd;
+                font-size: 2vw;
+                text-align: center;
             }
         </style>
     </head>
-    <body style="margin:0; padding:0">
+    <body style="margin:0; padding:0;overflow:hidden;" scroll="no">
         <!--Head of the page-->
         <header>
             <div class="head">
@@ -65,17 +99,20 @@
         </header>
 
         <div class="body">
-            <div class = "cam"><img id="web" style="width:100%;margin-left: auto;margin-right: auto;">
+            <div class = "cam"><img id="web" style="width:100%;text-align: center;">
                 <!--code to control the updating of the image-->
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.0.0/socket.io.js"></script>
                 <script>
-                    const socket = io.connect();
+                    var host = "http://192.168.0.12:3000";
+                    
+                    const socket = io.connect(host);
 
                     socket.on('web',(data) =>{
-                        const imageS = document.getElementById('web');
-
-                        imageS.src = data;
+                        //const imageS = document.getElementById('web');
+                        //imageS.src = data;
+                        console.log(data);
                     });
+                    
                 </script>
             </div>
         </div>
@@ -84,39 +121,120 @@
         <div class = "stickOut">
             <div class = "stick">
                 <div class = "sOut">
-                    <div class="sIn">
-                        <div id = "joy1" style="height:47vw;width:47vw;"></div>
-                    </div>
-                    <!--
-                    <div class="sIn">
-                        <div id = "joy2" style="height:47vw;width:47vw;"></div>
-                    </div>
-                    -->
+                    
+                        <div id = "joy1" style="height:47vw;width:47vw;margin-left: auto;margin-right: auto;color:black"></div>
+                    
                 </div>
             </div>
         </div>
+        <!--Controls the joystick and retrival of sensor data-->
         <script type="text/javascript">
-            var joy1 = new JoyStick('joy1');
-            //var joy2 = new JoyStick('joy2');
+            var joy1Param = {
+                                internalFillColor : "#202020",
+                                internalStrokeColor:"#000000",
+                                externalStrokeColor:"#202020"
+                            }
+            var joy1 = new JoyStick('joy1',joy1Param);
 
+
+            //handles joystick transfer
             setInterval(function(){
                 var xpos = joy1.GetX();
                 var ypos = joy1.GetY();
 
                 const xhttp = new XMLHttpRequest();
-                let fd = new FormData();
 
-                formData = {
+                //change this ip to match the ip of the host
+                xhttp.open('POST', host + "/joydata",false);
+                xhttp.setRequestHeader("Content-Type", "application/json");
+
+                xhttp.send(JSON.stringify({
                     "x": xpos.toString(),
-                    "y": ypos.toString()
+                    "y": ypos.toString(),
+                }));
+            },50);
+
+            //handles sensor data requests
+            function sensorData(){
+                const xhttp = new XMLHttpRequest();
+
+                xhttp.open('POST', host + "/sensordata",false);
+                xhttp.setRequestHeader("content-Type","application/json");
+
+                xhttp.send(JSON.stringify({
+                    "t" : document.getElementById('time').value
+                }));
+
+                const data = JSON.parse(xhttp.responseText);
+
+                var table = document.getElementById('sensor');
+                while(table.hasChildNodes()){
+                    table.removeChild(table.firstChild);
                 }
 
-                console.log(JSON.stringify(fd));
 
-                xhttp.open('POST', "http://10.227.242.104:3001/joydata",false);
-                xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhttp.send(JSON.stringify(formData));
-            },500);
+                var i = 0;
+
+                for(var time in data){
+                    if(data.hasOwnProperty(time)){
+                        console.log(data[time]);
+
+                        var row = table.insertRow(i);
+
+                        var timeCell = row.insertCell(0);
+                        var Lbump = row.insertCell(1);
+                        var Cbump = row.insertCell(2);
+                        var Rbump = row.insertCell(3);
+                        var Lcliff = row.insertCell(4);
+                        var Ccliff = row.insertCell(5);
+                        var Rcliff = row.insertCell(6);
+                        var Lwheel = row.insertCell(7);
+                        var Rwheel = row.insertCell(8);
+
+                        timeCell.innerHTML = data[time].time_in_ms;
+                        Lbump.innerHTML = data[time].L_bump;
+                        Cbump.innerHTML = data[time].C_bump
+                        Lbump.innerHTML = data[time].L_bump
+                        Cbump.innerHTML = data[time].C_bump
+                        Rbump.innerHTML = data[time].R_bump
+                        Lcliff.innerHTML= data[time].L_cliff
+                        Ccliff.innerHTML= data[time].C_cliff
+                        Rcliff.innerHTML= data[time].R_cliff
+                        Lwheel.innerHTML= data[time].L_wheel
+                        Rwheel.innerHTML= data[time].R_wheel
+
+
+                        i++;
+                    }
+                }
+            }
+
         </script>
+        <div class = "formholder">
+            <div style="font-size: 2vw;">
+                <p>Get data from the last
+                <input type="number" id="time" name="time" style="font-size: 2vw;"> ms      
+                <button onclick="sensorData()" style="font-size: 2vw;">Retrieve</button>
+                </p>
+            <div>
+        </div>
+        <div class="sensorTableHead">
+            <table id="sensorTableHead">
+                <tr>
+                    <td>Time</td>
+                    <td>L bump</td>
+                    <td>R bump</td>
+                    <td>C bump</td>
+                    <td>L cliff</td>
+                    <td>C cliff</td>
+                    <td>R cliff</td>
+                    <td>L wheel</td>
+                    <td>R wheel</td>
+                </tr>
+            </table>
+        <div class="sensorTable">
+            <table id = "sensor">
+            </table>      
+        </div>
     </body>
 </html>
