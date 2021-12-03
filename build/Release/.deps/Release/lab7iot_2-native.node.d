@@ -1,0 +1,1 @@
+cmd_Release/lab7iot_2-native.node := ln -f "Release/obj.target/lab7iot_2-native.node" "Release/lab7iot_2-native.node" 2>/dev/null || (rm -rf "Release/lab7iot_2-native.node" && cp -af "Release/obj.target/lab7iot_2-native.node" "Release/lab7iot_2-native.node")

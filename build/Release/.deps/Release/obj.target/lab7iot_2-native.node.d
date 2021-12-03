@@ -1,0 +1,1 @@
+cmd_Release/obj.target/lab7iot_2-native.node := g++ -o Release/obj.target/lab7iot_2-native.node -shared -pthread -rdynamic  -Wl,-soname=lab7iot_2-native.node -Wl,--start-group Release/obj.target/lab7iot_2-native/src/lab7.o Release/obj.target/lab7iot_2-native/src/lab7iot_2.o Release/obj.target/node_modules/node-addon-api/src/nothing.a -Wl,--end-group /usr/lib/libwiringPi.so

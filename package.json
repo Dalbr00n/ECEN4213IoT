@@ -1,0 +1,25 @@
+{
+  "main": "lib/binding.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mysql2": "^2.3.3",
+    "node-addon-api": "^1.1.0",
+    "socket.io": "^4.4.0"
+  },
+  "scripts": {
+    "test": "node --napi-modules ./test/test_binding.js"
+  },
+  "gypfile": true,
+  "name": "lab7iot_2",
+  "version": "1.0.0",
+  "description": "setup napi test",
+  "repository": {
+    "type": "git",
+    "url": "none"
+  },
+  "keywords": [
+    "none"
+  ],
+  "author": "daniel albrecht",
+  "license": "ISC"
+}

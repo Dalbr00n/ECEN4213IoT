@@ -1,0 +1,240 @@
+<html>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <head scroll="no">
+        <title>Robotic Control</title>
+        <style>
+            html, body {
+                overflow-x: hidden;
+                overscroll-behavior: contain;
+            }
+
+            .head{
+                display:table-row;
+                height: 20%;
+                
+            }
+            .logo{
+                display:table-cell;
+                width:30%;
+                background-color: black;
+            }
+            .title{
+                display:table-cell;
+                background-color: black;
+                color:white;
+                text-align:center;
+                vertical-align: middle;
+                font-size:6vw;
+                font-family:Arial, Helvetica, sans-serif;
+            }
+            .body{
+                display: table-row;
+                margin-left: auto;
+                margin-right: auto;
+                width:100vw;
+            }
+            .cam{
+                display: table-cell;
+                width:100%;
+            }
+            .stickOut{
+                display:table-row;
+            }
+            .stick{
+                display:table-cell;
+            }
+            .sOut{
+                display:block;
+                text-align: center;
+                width:100vw;
+            }
+            .sIn{
+                display:table-cell;
+                text-align: center;
+            }
+            .formholder{
+                display:table-row;
+                text-align: center;
+            }
+            .sensorTableHead{
+                width: 100vw;
+                height: 5vw;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .sensorTable{
+                width: 100vw;
+                height: 50vw;
+                overflow: auto;
+                margin-left: auto;
+                margin-right: auto;
+                border: 1px solid black
+            }
+            table{
+                border: 1px solid black;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            tr:nth-child(even){
+                background-color: #dddddd;
+            }
+            td{
+                width: 10vw;
+                height: 5vw;
+                border: 1px solid #dddddd;
+                font-size: 2vw;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body style="margin:0; padding:0;overflow:hidden;" scroll="no">
+        <!--Head of the page-->
+        <header>
+            <div class="head">
+                <div class="logo"><img src="img/osu.png" style="width:90%;padding:10%"></div>
+                <div class="title"><strong>ROBOTIC CONTROL</strong></div>
+            </div>
+        </header>
+
+        <div class="body">
+            <div class = "cam"><img id="web" style="width:100%;text-align: center;">
+                <!--code to control the updating of the image-->
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.0.0/socket.io.js"></script>
+                <script>
+                    var host = "http://10.198.214.55:3001";
+                    
+                    const socket = io.connect(host);
+
+                    socket.on('web',(data) =>{
+                        //const imageS = document.getElementById('web');
+                        //imageS.src = data;
+                        console.log(data);
+                    });
+                    
+                </script>
+            </div>
+        </div>
+        <!--Joystick section-->
+        <script src="joy.js"></script>
+        <div class = "stickOut">
+            <div class = "stick">
+                <div class = "sOut">
+                    
+                        <div id = "joy1" style="height:47vw;width:47vw;margin-left: auto;margin-right: auto;color:black"></div>
+                    
+                </div>
+            </div>
+        </div>
+        <!--Controls the joystick and retrival of sensor data-->
+        <script type="text/javascript">
+            var joy1Param = {
+                                internalFillColor : "#202020",
+                                internalStrokeColor:"#000000",
+                                externalStrokeColor:"#202020"
+                            }
+            var joy1 = new JoyStick('joy1',joy1Param);
+
+
+            //handles joystick transfer
+            setInterval(function(){
+                var xpos = joy1.GetX();
+                var ypos = joy1.GetY();
+
+                const xhttp = new XMLHttpRequest();
+
+                //change this ip to match the ip of the host
+                xhttp.open('POST', host + "/joydata",false);
+                xhttp.setRequestHeader("Content-Type", "application/json");
+
+                xhttp.send(JSON.stringify({
+                    "x": xpos.toString(),
+                    "y": ypos.toString(),
+                }));
+            },50);
+
+            //handles sensor data requests
+            function sensorData(){
+                const xhttp = new XMLHttpRequest();
+
+                xhttp.open('POST', host + "/sensordata",false);
+                xhttp.setRequestHeader("content-Type","application/json");
+
+                xhttp.send(JSON.stringify({
+                    "t" : document.getElementById('time').value
+                }));
+
+                const data = JSON.parse(xhttp.responseText);
+
+                var table = document.getElementById('sensor');
+                while(table.hasChildNodes()){
+                    table.removeChild(table.firstChild);
+                }
+
+
+                var i = 0;
+
+                for(var time in data){
+                    if(data.hasOwnProperty(time)){
+                        console.log(data[time]);
+
+                        var row = table.insertRow(i);
+
+                        var timeCell = row.insertCell(0);
+                        var Lbump = row.insertCell(1);
+                        var Cbump = row.insertCell(2);
+                        var Rbump = row.insertCell(3);
+                        var Lcliff = row.insertCell(4);
+                        var Ccliff = row.insertCell(5);
+                        var Rcliff = row.insertCell(6);
+                        var Lwheel = row.insertCell(7);
+                        var Rwheel = row.insertCell(8);
+
+                        timeCell.innerHTML = data[time].time_in_ms;
+                        Lbump.innerHTML = data[time].L_bump;
+                        Cbump.innerHTML = data[time].C_bump
+                        Lbump.innerHTML = data[time].L_bump
+                        Cbump.innerHTML = data[time].C_bump
+                        Rbump.innerHTML = data[time].R_bump
+                        Lcliff.innerHTML= data[time].L_cliff
+                        Ccliff.innerHTML= data[time].C_cliff
+                        Rcliff.innerHTML= data[time].R_cliff
+                        Lwheel.innerHTML= data[time].L_wheel
+                        Rwheel.innerHTML= data[time].R_wheel
+
+
+                        i++;
+                    }
+                }
+            }
+
+        </script>
+        <div class = "formholder">
+            <div style="font-size: 2vw;">
+                <p>Get data from the last
+                <input type="number" id="time" name="time" style="font-size: 2vw;"> ms      
+                <button onclick="sensorData()" style="font-size: 2vw;">Retrieve</button>
+                </p>
+            <div>
+        </div>
+        <div class="sensorTableHead">
+            <table id="sensorTableHead">
+                <tr>
+                    <td>Time</td>
+                    <td>L bump</td>
+                    <td>R bump</td>
+                    <td>C bump</td>
+                    <td>L cliff</td>
+                    <td>C cliff</td>
+                    <td>R cliff</td>
+                    <td>L wheel</td>
+                    <td>R wheel</td>
+                </tr>
+            </table>
+        <div class="sensorTable">
+            <table id = "sensor">
+            </table>      
+        </div>
+    </body>
+</html>
